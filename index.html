@@ -10,6 +10,7 @@
 </head>
 <body>
   <h1 class="page-title">Memory game</h1>
+      <!--- Overlay deo koji ce se pojavljavati u zavisnosti u kom se stanju nalazi igra (pocetak, pobeda, gubitak) -->
   <div class="overlay-text visible">
     Click to Start
   </div>
@@ -21,7 +22,7 @@
     VICTORY
     <span class="overlay-text-small">Click to Restart</span>
   </div>
-
+    <!--- Container sa karticama i informacijama o preostalom vremenu i broju poteza -->
   <div class="game-container-easy">
     <div class="game-info-container">
       <div class="game-info">
@@ -31,6 +32,7 @@
         Flips <span id="flips">0</span>
       </div>
     </div>
+    <!--- Div-ovi sa klasama za pozadinu i prednji deo karata, koje se kasnije gadjaju u JS-u. Po dve slike istog naziva i izgleda, kako bismo imali match (...slike uzete iz Blizzardove igre Hearthstone)-->
     <div class="card">
       <div class="card-back card-face">
  
@@ -192,6 +194,7 @@
       </div>
     </div>
   </div>
+      <!--- Linkovi ka drugim stranicama sa dodatnim karticama za veci izazov -->
   <div class="difficulties">
     | <a href="index.html">easy</a> | <a href="medium.html">medium</a> | <a href="hard.html">hard</a> |
   </div>

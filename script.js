@@ -1,5 +1,6 @@
 
-class AudioController {
+// Audio fajlovi za igru i ponasanje pri pozivu odredjenih funkcija. (pobeda, poraz, match...). Kao i slike, audio fajlovi su uglavnom iz Hearthstone-a.
+class AudioFiles {
     constructor() {
         this.bgMusic = new Audio('Assets/Audio/tabletop-battles.mp3');
         this.flipSound = new Audio('Assets/Audio/flip.wav');
@@ -37,22 +38,27 @@ class AudioController {
 
 class MemoryGame {
 
+    // konstruktor kome prosledjujemo vreme za igru i karte.
     constructor(totalTime, cards) {
         this.cardsArray = cards;
         this.totalTime = totalTime;
         this.timeRemaining = totalTime;
         this.timer = document.getElementById('time-remaining')
         this.ticker = document.getElementById('flips');
-        this.audioController = new AudioController();
+        this.AudioFiles = new AudioFiles();
     }
+    // pocetak igre, funkcija koja se poziva kada se skine overlay, ili kada se dese victory ili gameover.
     startGame() {
         this.totalClicks = 0;
         this.timeRemaining = this.totalTime;
         this.cardToCheck = null;
+        //prazan niz koji se puni kako budemo matchovali
         this.matchedCards = [];
+        //da li igrac moze da okrece karte ili ne
         this.busy = true;
+        // krece muzika, odbrojavanje i radi se shuffle po algoritmu.
         setTimeout(() => {
-            this.audioController.startMusic();
+            this.AudioFiles.startMusic();
             this.shuffleCards(this.cardsArray);
             this.countdown = this.startCountdown();
             this.busy = false;
@@ -61,6 +67,7 @@ class MemoryGame {
         this.timer.innerText = this.timeRemaining;
         this.ticker.innerText = this.totalClicks;
     }
+    // definisanje odbrojavanja, svaki sekund tajmer se smanjuje za 1sec, usput se proverava da li je tajmer pao do nule, ako jeste zove se gameOver.
     startCountdown() {
         return setInterval(() => {
             this.timeRemaining--;
@@ -71,12 +78,12 @@ class MemoryGame {
     }
     gameOver() {
         clearInterval(this.countdown);
-        this.audioController.gameOver();
+        this.AudioFiles.gameOver();
         document.getElementById('game-over-text').classList.add('visible');
     }
     victory() {
         clearInterval(this.countdown);
-        this.audioController.victory();
+        this.AudioFiles.victory();
         document.getElementById('victory-text').classList.add('visible');
     }
     hideCards() {
@@ -85,9 +92,10 @@ class MemoryGame {
             card.classList.remove('matched');
         });
     }
+    // ako moze da se okrene karta, dodajemo audio, povecavamo broj klikova, okrecemo kartu dodavajuci visible klasu karti.
     flipCard(card) {
         if(this.canFlipCard(card)) {
-            this.audioController.flip();
+            this.AudioFiles.flip();
             this.totalClicks++;
             this.ticker.innerText = this.totalClicks;
             card.classList.add('visible');
@@ -99,6 +107,7 @@ class MemoryGame {
             }
         }
     }
+    // provrava se da li se karte matchuju...
     checkForCardMatch(card) {
         if(this.getCardType(card) === this.getCardType(this.cardToCheck))
             this.cardMatch(card, this.cardToCheck);
@@ -107,15 +116,17 @@ class MemoryGame {
 
         this.cardToCheck = null;
     }
+    // ... ako se matchuju ubacuju se u prazan niz koji je ranije definisan. Takodje, proverava se da li su duzine niza karata i niza matchovanih karata iste - ako jesu zove se victory() i igra se zavrsava.
     cardMatch(card1, card2) {
         this.matchedCards.push(card1);
         this.matchedCards.push(card2);
         card1.classList.add('matched');
         card2.classList.add('matched');
-        this.audioController.match();
+        this.AudioFiles.match();
         if(this.matchedCards.length === this.cardsArray.length)
             this.victory();
     }
+    // sa druge strane, ako se karte nisu slozile, sklanja se visible klasa i karte se vracaju nazad na pozadinu - ali tek nakon 1 sekunde, da bi igrac imao vremena da proba da zapamti sta je bilo na karti.
     cardMismatch(card1, card2) {
         this.busy = true;
         setTimeout(() => {
@@ -131,14 +142,17 @@ class MemoryGame {
             cardsArray[i].style.order = randIndex;
         }
     }
+    //cita se source za sliku - potrebno za matchovanje da vidimo da li je isti kada flipujemo dve karte.
     getCardType(card) {
         return card.getElementsByClassName('card-value')[0].src;
     }
+    //uslov da li igrac moze da okrene kartu
     canFlipCard(card) {
         return !this.busy && !this.matchedCards.includes(card) && card !== this.cardToCheck;
     }
 }
 
+// Ne pokretati program dok se ne ucita ceo HTML
 
 if (document.readyState == 'loading') {
     document.addEventListener('DOMContentLoaded', ready);
@@ -146,12 +160,14 @@ if (document.readyState == 'loading') {
     ready();
 }
 
+// Pravi se niz iz HTML klasa koje presledjujemo. Pokrecemo igru sa limitom od 100 sekundi i prosledjujemo niz karata iz HTMLa
 
 function ready() {
     let overlays = Array.from(document.getElementsByClassName('overlay-text'));
     let cards = Array.from(document.getElementsByClassName('card'));
     let game = new MemoryGame(100, cards);
 
+// Dodajemo na overlay deo u HTMLu listener i skidamo klasu koja mu daje vidljivost, kada kliknemo na overlay. Nakon toga, treba da se pokrene igra sa StartGame.
 
     overlays.forEach(overlay => {
         overlay.addEventListener('click', () => {
@@ -159,6 +175,7 @@ function ready() {
             game.startGame();
         });
     });
+// na klik misa se karta okrece u skladu sa flipCard funkcijom.
     cards.forEach(card => {
         card.addEventListener('click', () => {
             game.flipCard(card);
